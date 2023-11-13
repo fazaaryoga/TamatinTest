@@ -94,9 +94,9 @@ GameObject:
   - component: {fileID: 6261451299056928394}
   - component: {fileID: 6755585270793243766}
   - component: {fileID: 2612845027889259681}
-  - component: {fileID: -6555492270305259636}
+  - component: {fileID: -3911602614002158543}
   m_Layer: 0
-  m_Name: Tile
+  m_Name: TileB
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -160,7 +160,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: 6d38cbdc98a7dbf419cc756d803401f9, type: 3}
+  m_Sprite: {fileID: 21300000, guid: f1a5e78355f25994f87e4428fc368827, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -216,7 +216,7 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 1, y: 1}
   m_EdgeRadius: 0
---- !u!114 &-6555492270305259636
+--- !u!114 &-3911602614002158543
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -225,11 +225,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 3510810658877626058}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2cd5fcfc8d21c9a4293d75e65839dfa6, type: 3}
+  m_Script: {fileID: 11500000, guid: cd969c985e9f53043943f9c03204ba13, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  tileType: 0
+  tileType: 2
   tileCoord: {x: 0, y: 0}
+  canClick: 1
   canPlaceHighlight: {fileID: 9221170771011498022}
   spriteRenderer: {fileID: 6755585270793243766}
   sprites:
@@ -237,6 +238,7 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 1a4ba78bd0f04024f8331b97e6a46066, type: 3}
   - {fileID: 21300000, guid: f1a5e78355f25994f87e4428fc368827, type: 3}
   - {fileID: 21300000, guid: c0c187f32a4b140468ee188b6619a4a5, type: 3}
+  score: 10
 --- !u!1 &9221170771011498022
 GameObject:
   m_ObjectHideFlags: 0

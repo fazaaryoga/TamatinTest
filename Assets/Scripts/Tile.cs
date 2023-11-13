@@ -10,54 +10,70 @@ public class Tile : MonoBehaviour
     public TileType tileType = TileType.Empty;
     public static Dictionary<Vector2, Tile> tiles;
     public Vector2 tileCoord;
+    public bool canClick = true;
 
     [SerializeField] GameObject canPlaceHighlight;
     [SerializeField] SpriteRenderer spriteRenderer;
     [SerializeField] Sprite[] sprites;
+    [SerializeField] public int score = 0;
 
-    private static int tileWidth;
-    private static int tileHeight;
-
-    private void Awake()
-    {
+    public static int tileWidth;
+    public static int tileHeight;
+    protected virtual bool Check(Vector2 tileCoord) {
+        if (tiles[tileCoord].tileType != TileType.Empty) {
+            return false;
+        }
+        else
+        {
+            return true;
+        }
     }
-
-    // Start is called before the first frame update
-    void Start()
-    {
-        tileWidth = GameManager.gameManager.tileWidth;
-        tileHeight = GameManager.gameManager.tileHeight;
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
         
+    protected virtual void Uncheck(Vector2 tileCoord) {
+    }
+
+    private void Start()
+    {
+        spriteRenderer = gameObject.GetComponent<SpriteRenderer>();
     }
 
     private void OnMouseEnter()
     {
-        //checkRook();
-        //checkBishop();
-        checkKnight();
+        if (canClick)
+        {
+        GameManager.gameManager.tilesToPlay.Peek().Check(tileCoord);
+        }
     }
 
     private void OnMouseExit()
     {
-        //uncheckRook();
-        //uncheckBishop();
-        uncheckKnight();
+        if (canClick)
+        {
+            GameManager.gameManager.tilesToPlay.Peek().Uncheck(tileCoord);
+        
+        }
     }
 
     private void OnMouseDown()
     {
-        SetTile(TileType.B);
+        if (GameManager.gameManager.tilesToPlay.Peek().Check(tileCoord))
+        {
+            GameManager.gameManager.tilesToPlay.Peek().Uncheck(tileCoord);
+            SetTile();
+        }
+        else
+        {
+            GameManager.gameManager.ReduceHealth();
+        }
     }
-
-    public void SetTile(TileType tileType)
+    public void SetTile()
     {
-        this.tileType = tileType;
-        spriteRenderer.sprite = sprites[(int)tileType];
+        Tile newTile = GameManager.gameManager.tilesToPlay.Dequeue();
+        newTile.InitializeTile(gameObject.name, tileCoord);
+        newTile.transform.position = new Vector3(tileCoord.x, tileCoord.y, -1);
+        Tile.tiles[tileCoord].canClick = true;
+        GameManager.gameManager.ProcessTile();
+        Destroy(gameObject);
     }
 
     public void HighlightTile()
@@ -70,159 +86,7 @@ public class Tile : MonoBehaviour
         canPlaceHighlight.SetActive(false);
     }
 
-    public void checkRook()
-    {
-        for (int i = 0; i < tileWidth; i++)
-        {
-            if(i != tileCoord.x)
-            {
-                Tile.tiles[new Vector2(i, tileCoord.y)].HighlightTile();
-            }
-        }
-        for (int i = 0; i < tileHeight; i++)
-        {
-            if (i != tileCoord.y)
-            {
-                Tile.tiles[new Vector2(tileCoord.x, i)].HighlightTile();
-            }
-        }
-    }
-
-    public void uncheckRook()
-    {
-        for (int i = 0; i < tileWidth; i++)
-        {
-            if (i != tileCoord.x)
-            {
-                Tile.tiles[new Vector2(i, tileCoord.y)].unHighlightTile();
-            }
-        }
-        for (int i = 0; i < tileHeight; i++)
-        {
-            if (i != tileCoord.y)
-            {
-                Tile.tiles[new Vector2(tileCoord.x, i)].unHighlightTile();
-            }
-        }
-    }
-
-    public void checkBishop()
-    {
-        for(int i = 1; i < (isBigger(tileWidth - tileCoord.x, tileHeight - tileCoord.y) ? tileHeight - tileCoord.y : tileWidth - tileCoord.x); i++)
-        {
-            Tile.tiles[new Vector2(tileCoord.x + i, tileCoord.y + i)].HighlightTile();
-        }
-        for (int i = 1; i < (isBigger(tileWidth - tileCoord.x -1, tileCoord.y) ? tileCoord.y + 1 : tileWidth - tileCoord.x); i++)
-        {
-            Tile.tiles[new Vector2(tileCoord.x + i, tileCoord.y - i)].HighlightTile();
-        }
-        for (int i = 1; i < (isBigger(tileCoord.x, tileCoord.y) ? tileCoord.y + 1 : tileCoord.x + 1); i++)
-        {
-            Tile.tiles[new Vector2(tileCoord.x - i, tileCoord.y - i)].HighlightTile();
-        }
-        for (int i = 1; i < (isBigger(tileCoord.x, tileHeight - tileCoord.y - 1) ? tileHeight - tileCoord.y : tileCoord.x + 1); i++)
-        {
-            Tile.tiles[new Vector2(tileCoord.x - i, tileCoord.y + i)].HighlightTile();
-        }
-
-    }
-
-    public void uncheckBishop()
-    {
-        for (int i = 1; i < (isBigger(tileWidth - tileCoord.x, tileHeight - tileCoord.y) ? tileHeight - tileCoord.y : tileWidth - tileCoord.x); i++)
-        {
-            Tile.tiles[new Vector2(tileCoord.x + i, tileCoord.y + i)].unHighlightTile();
-        }
-        for (int i = 1; i < (isBigger(tileWidth - tileCoord.x - 1, tileCoord.y) ? tileCoord.y + 1 : tileWidth - tileCoord.x); i++)
-        {
-            Tile.tiles[new Vector2(tileCoord.x + i, tileCoord.y - i)].unHighlightTile();
-        }
-        for (int i = 1; i < (isBigger(tileCoord.x, tileCoord.y) ? tileCoord.y + 1 : tileCoord.x + 1); i++)
-        {
-            Tile.tiles[new Vector2(tileCoord.x - i, tileCoord.y - i)].unHighlightTile();
-        }
-        for (int i = 1; i < (isBigger(tileCoord.x, tileHeight - tileCoord.y - 1) ? tileHeight - tileCoord.y : tileCoord.x + 1); i++)
-        {
-            Tile.tiles[new Vector2(tileCoord.x - i, tileCoord.y + i)].unHighlightTile();
-        }
-
-    }
-
-    public void checkKnight()
-    {
-        Tile x;
-        if(Tile.tiles.TryGetValue(new Vector2(tileCoord.x + 2, tileCoord.y + 1), out x))
-        {
-            Tile.tiles[new Vector2(tileCoord.x + 2, tileCoord.y + 1)].HighlightTile();
-        }
-        if (Tile.tiles.TryGetValue(new Vector2(tileCoord.x + 2, tileCoord.y - 1), out x))
-        {
-            Tile.tiles[new Vector2(tileCoord.x + 2, tileCoord.y - 1)].HighlightTile();
-        }
-        if (Tile.tiles.TryGetValue(new Vector2(tileCoord.x - 2, tileCoord.y + 1), out x))
-        {
-            Tile.tiles[new Vector2(tileCoord.x - 2, tileCoord.y + 1)].HighlightTile();
-        }
-        if (Tile.tiles.TryGetValue(new Vector2(tileCoord.x - 2, tileCoord.y - 1), out x))
-        {
-            Tile.tiles[new Vector2(tileCoord.x - 2, tileCoord.y - 1)].HighlightTile();
-        }
-        if (Tile.tiles.TryGetValue(new Vector2(tileCoord.x + 1, tileCoord.y + 2), out x))
-        {
-            Tile.tiles[new Vector2(tileCoord.x + 1, tileCoord.y + 2)].HighlightTile();
-        }
-        if (Tile.tiles.TryGetValue(new Vector2(tileCoord.x + 1, tileCoord.y - 2), out x))
-        {
-            Tile.tiles[new Vector2(tileCoord.x + 1, tileCoord.y - 2)].HighlightTile();
-        }
-        if (Tile.tiles.TryGetValue(new Vector2(tileCoord.x - 1, tileCoord.y + 2), out x))
-        {
-            Tile.tiles[new Vector2(tileCoord.x - 1, tileCoord.y + 2)].HighlightTile();
-        }
-        if (Tile.tiles.TryGetValue(new Vector2(tileCoord.x - 1, tileCoord.y - 2), out x))
-        {
-            Tile.tiles[new Vector2(tileCoord.x - 1, tileCoord.y - 2)].HighlightTile();
-        }
-    }
-
-    public void uncheckKnight()
-    {
-        Tile x;
-        if (Tile.tiles.TryGetValue(new Vector2(tileCoord.x + 2, tileCoord.y + 1), out x))
-        {
-            Tile.tiles[new Vector2(tileCoord.x + 2, tileCoord.y + 1)].unHighlightTile();
-        }
-        if (Tile.tiles.TryGetValue(new Vector2(tileCoord.x + 2, tileCoord.y - 1), out x))
-        {
-            Tile.tiles[new Vector2(tileCoord.x + 2, tileCoord.y - 1)].unHighlightTile();
-        }
-        if (Tile.tiles.TryGetValue(new Vector2(tileCoord.x - 2, tileCoord.y + 1), out x))
-        {
-            Tile.tiles[new Vector2(tileCoord.x - 2, tileCoord.y + 1)].unHighlightTile();
-        }
-        if (Tile.tiles.TryGetValue(new Vector2(tileCoord.x - 2, tileCoord.y - 1), out x))
-        {
-            Tile.tiles[new Vector2(tileCoord.x - 2, tileCoord.y - 1)].unHighlightTile();
-        }
-        if (Tile.tiles.TryGetValue(new Vector2(tileCoord.x + 1, tileCoord.y + 2), out x))
-        {
-            Tile.tiles[new Vector2(tileCoord.x + 1, tileCoord.y + 2)].unHighlightTile();
-        }
-        if (Tile.tiles.TryGetValue(new Vector2(tileCoord.x + 1, tileCoord.y - 2), out x))
-        {
-            Tile.tiles[new Vector2(tileCoord.x + 1, tileCoord.y - 2)].unHighlightTile();
-        }
-        if (Tile.tiles.TryGetValue(new Vector2(tileCoord.x - 1, tileCoord.y + 2), out x))
-        {
-            Tile.tiles[new Vector2(tileCoord.x - 1, tileCoord.y + 2)].unHighlightTile();
-        }
-        if (Tile.tiles.TryGetValue(new Vector2(tileCoord.x - 1, tileCoord.y - 2), out x))
-        {
-            Tile.tiles[new Vector2(tileCoord.x - 1, tileCoord.y - 2)].unHighlightTile();
-        }
-    }
-
-    private bool isBigger(float x, float y)
+    protected bool isBigger(float x, float y)
     {
         if(x >= y)
         {
@@ -232,5 +96,12 @@ public class Tile : MonoBehaviour
         {
             return false;
         }
+    }
+
+    public void InitializeTile(string name, Vector2 tileCoord)
+    {
+        this.name = name;
+        this.tileCoord = tileCoord;
+        tiles[tileCoord] = this;
     }
 }
