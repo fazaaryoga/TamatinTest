@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Threading;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using Random = UnityEngine.Random;
 
 public class GameManager : MonoBehaviour
@@ -89,14 +90,15 @@ public class GameManager : MonoBehaviour
         foreach (KeyValuePair<int, List<Vector2>> pair in tileCoordinates)
         {
             if(pair.Value.Count == 4) {
-                Debug.Log("key: " + pair.Key + " count: " + pair.Value.Count);
+                Debug.Log("key: " + tileDict[pair.Value[0]].tileType + " count: " + pair.Value.Count);
                 addScore(tileDict[pair.Value[0]].score);
                 Debug.Log(tileDict[pair.Value[0]].score);
                 for(int i = 0; i < pair.Value.Count; i++)
                 {
+                    Tile oldTile = tileDict[pair.Value[i]];
                     Tile newTile = Instantiate(tilePrefabs[0], new Vector3(pair.Value[i].x, pair.Value[i].y, -1), Quaternion.identity);
-                    newTile.tileCoord = pair.Value[i];
-                    tileDict[pair.Value[i]] = newTile;
+                    newTile.InitializeTile(oldTile.gameObject.name, pair.Value[i]);
+                    Destroy(oldTile.gameObject);
                 }
             }
         }
@@ -137,7 +139,10 @@ public class GameManager : MonoBehaviour
         playHurtSound();
         DisplayHealth();
         ResetTimer();
-        if (health <= 0) { }
+        if (health <= 0) {
+            PlayerPrefs.SetFloat("Score", score);
+            SceneManager.LoadScene("GameOver");
+        }
     }
 
     void ResetTimer()

@@ -31,7 +31,6 @@ public class TileA : Tile
                 }
             }
         }
-        Debug.Log(canPlace);
         return canPlace;
     }
 
